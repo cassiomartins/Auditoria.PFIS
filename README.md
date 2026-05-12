@@ -2,6 +2,9 @@
 
 Sistema web de apoio à fiscalização periódica de unidades (PFIS — Fiscalização de Unidades), desenvolvido com Django. Auditoria PFIS foi baseada na fiscalização de qualidade de alguns restaurantes comunitários do governo federal de Brasília. A ferramenta digitaliza o processo de auditoria de campo: o fiscal visita uma unidade, percorre um checklist padronizado de 119 itens, registra o status de conformidade de cada ponto, anexa evidências fotográficas e, ao final, gera um relatório em PDF.
 
+<img width="1895" height="1052" alt="3" src="https://github.com/user-attachments/assets/0412daa0-fbf2-4965-ae30-8dae89d75c62" />
+
+
 ## O que é auditado
 
 Cada auditoria cobre uma **unidade** (filial ou estabelecimento) e é conduzida por um **Fiscal PFIS**. O checklist é dividido em seções temáticas e abrange itens com diferentes periodicidades (diária, semanal, mensal, semestral e anual). Para cada item o fiscal registra:
