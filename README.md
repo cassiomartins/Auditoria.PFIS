@@ -114,6 +114,10 @@ python manage.py runserver
 | **Fiscal**              | Cria e preenche suas próprias auditorias                          |
 | **Responsável de Unidade** | Visualiza apenas as auditorias da sua unidade                  |
 
+## Licença
+
+Este projeto é open source, distribuído sob a licença MIT. Contribuições são bem-vindas.
+
 ## Comandos úteis
 
 ```bash
@@ -123,7 +127,3 @@ python manage.py seed_checklist
 # Coletar arquivos estáticos (produção)
 python manage.py collectstatic --noinput
 ```
-
-## Licença
-
-MIT License — consulte o arquivo [LICENSE](LICENSE) para detalhes.
