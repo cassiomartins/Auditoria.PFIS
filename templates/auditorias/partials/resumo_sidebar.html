@@ -1,0 +1,41 @@
+<h3 class="text-base font-bold text-on-surface mb-4">Resumo da Auditoria</h3>
+
+<div class="space-y-3">
+  <div class="flex justify-between items-center py-2 border-b border-surface-container">
+    <span class="text-sm font-label text-on-surface-variant">Total de Itens</span>
+    <span class="font-bold text-on-surface">{{ auditoria.total_itens }}</span>
+  </div>
+  <div class="flex justify-between items-center py-2 border-b border-surface-container">
+    <span class="text-sm font-label text-on-surface-variant">Conformes</span>
+    <span class="font-bold text-primary">{{ auditoria.conformes }}</span>
+  </div>
+  <div class="flex justify-between items-center py-2 border-b border-surface-container">
+    <span class="text-sm font-label text-on-surface-variant">Não Conformes</span>
+    <span class="font-bold text-error">{{ auditoria.nao_conformes }}</span>
+  </div>
+  <div class="flex justify-between items-center py-2 border-b border-surface-container">
+    <span class="text-sm font-label text-on-surface-variant">N/A</span>
+    <span class="font-bold text-on-surface-variant">{{ auditoria.nao_aplicaveis }}</span>
+  </div>
+  <div class="flex justify-between items-center py-2">
+    <span class="text-sm font-label text-on-surface-variant">Pendentes</span>
+    <span class="font-bold text-tertiary">{{ auditoria.pendentes }}</span>
+  </div>
+</div>
+
+<div class="mt-6 pt-5 border-t border-surface-container text-center">
+  <p class="text-xs font-label font-bold text-on-surface-variant uppercase mb-1">Índice de Conformidade</p>
+  <div class="text-4xl font-black text-primary mt-1">
+    {{ auditoria.indice_conformidade }}<span class="text-xl">%</span>
+  </div>
+  <div class="mt-3 flex gap-0.5 h-2 rounded-full overflow-hidden bg-surface-container-highest">
+    {% if auditoria.total_itens > 0 %}
+    <div class="bg-primary h-full transition-all duration-500"
+         style="width: {{ auditoria.indice_conformidade }}%"></div>
+    {% if auditoria.nao_conformes > 0 %}
+    <div class="bg-error h-full transition-all duration-500"
+         style="width: {% widthratio auditoria.nao_conformes auditoria.total_itens 100 %}%"></div>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>

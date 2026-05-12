@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Auditoria PFIS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0d6b0e',
+            'surface-container-low': '#f0f5e9',
+            'outline-variant': '#bfcab8',
+            'on-surface': '#181d16',
+            'on-surface-variant': '#40493c',
+          },
+          fontFamily: {
+            body: ['Public Sans', 'sans-serif'],
+            label: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    .audit-pulse { background: linear-gradient(135deg, #0d6b0e 0%, #45673d 100%); }
+  </style>
+</head>
+<body class="min-h-screen bg-[#f6fbef] font-body flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <!-- Logo / Título -->
+    <div class="text-center mb-10">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full audit-pulse mb-4">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <p class="text-xs font-label font-bold text-primary tracking-widest uppercase mb-1">Sistema de Controle</p>
+      <h1 class="text-3xl font-black text-on-surface tracking-tight">Auditoria Interna PFIS</h1>
+    </div>
+
+    <!-- Formulário -->
+    <div class="bg-white rounded-xl p-8 shadow-sm">
+      <h2 class="text-lg font-bold text-on-surface mb-6">Acesso ao Sistema</h2>
+
+      {% if form.non_field_errors %}
+      <div class="mb-4 p-3 bg-red-50 rounded-lg text-sm text-red-700 font-semibold">
+        {{ form.non_field_errors }}
+      </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="mb-6">
+          <label class="block text-xs font-label font-bold text-on-surface-variant uppercase mb-2">
+            {{ form.username.label }}
+          </label>
+          {{ form.username }}
+          {% if form.username.errors %}
+          <p class="mt-1 text-xs text-red-600">{{ form.username.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+
+        <div class="mb-8">
+          <label class="block text-xs font-label font-bold text-on-surface-variant uppercase mb-2">
+            {{ form.password.label }}
+          </label>
+          {{ form.password }}
+          {% if form.password.errors %}
+          <p class="mt-1 text-xs text-red-600">{{ form.password.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+
+        <button type="submit"
+                class="w-full audit-pulse text-white font-bold py-3 rounded-sm shadow-md hover:opacity-90 transition-opacity active:scale-[0.98] text-sm tracking-wide">
+          ENTRAR
+        </button>
+      </form>
+    </div>
+
+    <p class="text-center text-xs text-on-surface-variant mt-6 font-label">
+      PFIS — Cozinha Industrial
+    </p>
+  </div>
+</body>
+</html>

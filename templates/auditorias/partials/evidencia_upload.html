@@ -1,0 +1,26 @@
+{% if resposta.tem_evidencia %}
+<div class="flex items-center gap-3">
+  <img src="{% url 'evidencia_download' auditoria.pk resposta.pk %}" alt="Evidência" class="w-20 h-20 object-cover rounded-lg" />
+  <div>
+    <p class="text-xs font-label font-bold text-on-error-container">Evidência anexada</p>
+    <a href="{% url 'evidencia_download' auditoria.pk resposta.pk %}" download="{{ resposta.evidencia_filename }}"
+       class="mt-1 flex items-center gap-1 text-xs text-on-error-container underline underline-offset-2 hover:opacity-70 transition-opacity">
+      <span class="material-symbols-outlined text-sm">download</span>
+      Baixar
+    </a>
+    <label class="mt-2 flex items-center gap-1.5 px-3 py-1.5 bg-white border border-error/30 text-on-error-container rounded-sm text-xs font-semibold cursor-pointer hover:bg-error/5 transition-colors">
+      <span class="material-symbols-outlined text-sm">upload_file</span>
+      Trocar foto
+      <input type="file" name="evidencia" accept="image/*" class="hidden"
+             onchange="this.form.dispatchEvent(new Event('submit', {bubbles: true}))">
+    </label>
+  </div>
+</div>
+{% else %}
+<label class="flex items-center gap-2 px-4 py-2 bg-white border border-error/30 text-on-error-container rounded-sm text-xs font-semibold cursor-pointer hover:bg-error/5 transition-colors w-fit">
+  <span class="material-symbols-outlined text-sm">upload_file</span>
+  ANEXAR EVIDÊNCIA
+  <input type="file" name="evidencia" accept="image/*" class="hidden"
+         onchange="this.form.dispatchEvent(new Event('submit', {bubbles: true}))">
+</label>
+{% endif %}

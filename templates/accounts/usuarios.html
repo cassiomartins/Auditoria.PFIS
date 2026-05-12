@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Usuários — PFIS{% endblock %}
+{% block content %}
+<div class="px-4 md:px-8 py-8 max-w-5xl">
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <p class="text-xs font-label font-bold text-primary tracking-widest uppercase mb-1">Administração</p>
+      <h1 class="text-3xl font-headline font-extrabold text-on-surface tracking-tight">Usuários</h1>
+    </div>
+    <a href="{% url 'usuario_novo' %}"
+       class="audit-pulse text-white font-bold px-5 py-3 rounded-sm text-sm flex items-center gap-2 hover:opacity-90 transition-opacity">
+      <span class="material-symbols-outlined text-lg">person_add</span>
+      Novo Usuário
+    </a>
+  </div>
+
+  <div class="space-y-2">
+    {% for u in usuarios %}
+    <div class="bg-surface-container-lowest rounded-lg p-4 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+          {{ u.first_name|first|default:u.username|first|upper }}
+        </div>
+        <div>
+          <p class="font-semibold text-on-surface text-sm">{{ u.get_full_name|default:u.username }}</p>
+          <p class="text-xs font-label text-on-surface-variant">
+            {{ u.username }} &mdash; {{ u.get_perfil_display }}
+            {% if u.unidade %}&mdash; {{ u.unidade.nome }}{% endif %}
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        {% if not u.is_active %}
+        <span class="text-xs font-label font-bold px-2 py-1 rounded-full bg-error/10 text-error">Inativo</span>
+        {% endif %}
+        <a href="{% url 'usuario_editar' u.pk %}"
+           class="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors">
+          <span class="material-symbols-outlined text-lg">edit</span>
+        </a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-16 text-on-surface-variant">Nenhum usuário cadastrado.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

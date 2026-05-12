@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}{{ auditoria.documento }} — Detalhe{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'auditoria_pdf' auditoria.pk %}" target="_blank"
+   class="flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-primary px-3 py-2 rounded-lg hover:bg-surface-container transition-all">
+  <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+  Gerar PDF
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="px-4 md:px-8 py-8 max-w-7xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <a href="{% url 'auditorias' %}" class="text-xs font-label text-on-surface-variant hover:text-primary flex items-center gap-1 mb-3 transition-colors w-fit">
+      <span class="material-symbols-outlined text-base">arrow_back</span>
+      Todas as auditorias
+    </a>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <p class="text-xs font-label font-bold text-primary tracking-widest uppercase mb-1">Auditoria Finalizada</p>
+        <h1 class="text-2xl md:text-3xl font-headline font-extrabold text-on-surface tracking-tight">{{ auditoria.documento }}</h1>
+      </div>
+      <span class="text-sm font-label font-bold px-4 py-2 rounded-full w-fit
+                   {% if auditoria.status == 'finalizada' %}bg-primary/10 text-primary{% else %}bg-tertiary/10 text-tertiary{% endif %}">
+        {{ auditoria.get_status_display }}
+      </span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+    <!-- Checklist somente-leitura -->
+    <div class="xl:col-span-3 space-y-6" x-data="{ secaoAberta: null }">
+      <!-- Metadados -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-surface-container-low p-5 rounded-lg">
+          <p class="text-xs font-label font-bold text-on-surface-variant uppercase mb-1">Unidade</p>
+          <p class="font-semibold text-on-surface">{{ auditoria.unidade.nome }}</p>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-lg">
+          <p class="text-xs font-label font-bold text-on-surface-variant uppercase mb-1">Data</p>
+          <p class="font-semibold text-on-surface">{{ auditoria.data|date:"d/m/Y" }}</p>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-lg">
+          <p class="text-xs font-label font-bold text-on-surface-variant uppercase mb-1">Fiscal PFIS</p>
+          <p class="font-semibold text-on-surface">{{ auditoria.fiscal.get_full_name|default:auditoria.fiscal.username }}</p>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-lg md:col-span-3">
+          <p class="text-xs font-label font-bold text-on-surface-variant uppercase mb-1">Responsável Técnico</p>
+          <p class="font-semibold text-on-surface">{{ auditoria.responsavel_tecnico }}</p>
+        </div>
+      </div>
+
+      <!-- Seções -->
+      {% for secao, respostas in secoes.items %}
+      {% with secao_id="sd-"|add:forloop.counter|stringformat:"s" %}
+      <div>
+        <button @click="secaoAberta = (secaoAberta === '{{ secao_id }}') ? null : '{{ secao_id }}'"
+                class="w-full flex items-center justify-between p-5 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors text-left">
+          <div class="flex items-center gap-4">
+            <span class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+              {{ forloop.counter }}
+            </span>
+            <div>
+              <h3 class="text-base font-bold text-on-surface">{{ secao }}</h3>
+              <p class="text-xs font-label text-on-surface-variant mt-0.5">{{ respostas|length }} itens</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline transition-transform duration-200"
+                :class="secaoAberta === '{{ secao_id }}' ? 'rotate-180' : ''">expand_more</span>
+        </button>
+
+        <div x-show="secaoAberta === '{{ secao_id }}'" x-collapse x-cloak class="mt-2 space-y-2 px-1">
+          {% for resposta in respostas %}
+          <div class="bg-surface-container-lowest p-5 rounded-lg
+                      {% if resposta.status == 'nao_conforme' %}border-l-4 border-l-error{% endif %}">
+            <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+              <div class="flex-1">
+                <span class="font-label text-xs font-bold uppercase
+                             {% if resposta.status == 'nao_conforme' %}text-error{% elif resposta.status == 'conforme' %}text-primary{% else %}text-outline{% endif %}">
+                  Item {{ resposta.item.numero }}
+                </span>
+                <p class="text-on-surface mt-1 leading-relaxed text-sm">{{ resposta.item.texto }}</p>
+              </div>
+              <span class="text-xs font-label font-bold px-3 py-1.5 rounded-full shrink-0
+                           {% if resposta.status == 'conforme' %}bg-primary/10 text-primary
+                           {% elif resposta.status == 'nao_conforme' %}bg-error/10 text-error
+                           {% elif resposta.status == 'nao_aplicavel' %}bg-surface-container text-on-surface-variant
+                           {% else %}bg-tertiary/10 text-tertiary{% endif %}">
+                {{ resposta.get_status_display }}
+              </span>
+            </div>
+            {% if resposta.observacao %}
+            <div class="mt-3 p-3 bg-surface-container-low rounded-md">
+              <p class="text-xs font-label font-bold text-on-surface-variant uppercase mb-1">Observação</p>
+              <p class="text-sm text-on-surface">{{ resposta.observacao }}</p>
+            </div>
+            {% endif %}
+            {% if resposta.evidencia %}
+            <div class="mt-3">
+              <p class="text-xs font-label font-bold text-on-surface-variant uppercase mb-2">Evidência</p>
+              <img src="{{ resposta.evidencia.url }}" alt="Evidência item {{ resposta.item.numero }}"
+                   class="w-32 h-32 object-cover rounded-lg" />
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endwith %}
+      {% endfor %}
+
+      <!-- Ação: editar se rascunho -->
+      {% if auditoria.status == 'rascunho' %}
+      {% if request.user.is_gestor or auditoria.fiscal == request.user %}
+      <div class="mt-6">
+        <a href="{% url 'auditoria_preencher' auditoria.pk %}"
+           class="audit-pulse text-white font-bold px-6 py-3 rounded-sm text-sm inline-flex items-center gap-2 hover:opacity-90 transition-opacity">
+          <span class="material-symbols-outlined text-lg">edit</span>
+          Continuar Preenchimento
+        </a>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+
+    <!-- Sidebar resumo -->
+    <div class="xl:col-span-1">
+      <div class="sticky top-24 space-y-4">
+        <div class="bg-surface-container-lowest rounded-lg p-6 shadow-sm">
+          {% include "auditorias/partials/resumo_sidebar.html" with auditoria=auditoria %}
+        </div>
+        <a href="{% url 'auditoria_pdf' auditoria.pk %}" target="_blank"
+           class="w-full bg-white border-2 border-primary text-primary font-bold py-4 rounded-sm text-sm flex items-center justify-center gap-2 hover:bg-primary/5 transition-all active:scale-95">
+          <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+          GERAR PDF FINAL
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

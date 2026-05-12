@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ auditoria.documento }} — Relatório de Auditoria PFIS</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10pt;
+      color: #181d16;
+      background: #fff;
+      line-height: 1.5;
+    }
+
+    .label { font-family: Arial, Helvetica, sans-serif; }
+
+    /* Cabeçalho do relatório */
+    .report-header {
+      border-bottom: 3px solid #0d6b0e;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+    .report-header .org {
+      font-size: 8pt;
+      font-weight: 700;
+      color: #0d6b0e;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .report-header h1 {
+      font-size: 18pt;
+      font-weight: 900;
+      color: #181d16;
+      letter-spacing: -0.02em;
+      margin-top: 4px;
+    }
+    .report-header .doc-id {
+      font-size: 10pt;
+      font-weight: 700;
+      color: #0d6b0e;
+      font-family: Arial, Helvetica, sans-serif;
+      margin-top: 4px;
+    }
+
+    /* Grid de metadados */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .meta-cell {
+      background: #f0f5e9;
+      padding: 10px 12px;
+      border-radius: 2px;
+    }
+    .meta-cell .meta-label {
+      font-size: 7pt;
+      font-weight: 700;
+      color: #40493c;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .meta-cell .meta-value {
+      font-size: 10pt;
+      font-weight: 600;
+      color: #181d16;
+      margin-top: 2px;
+    }
+    .meta-cell.wide { grid-column: span 2; }
+
+    /* Resumo executivo */
+    .summary-box {
+      background: #f0f5e9;
+      border-left: 4px solid #0d6b0e;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      border-radius: 0 2px 2px 0;
+    }
+    .summary-box h2 {
+      font-size: 9pt;
+      font-weight: 700;
+      color: #0d6b0e;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: Arial, Helvetica, sans-serif;
+      margin-bottom: 10px;
+    }
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .stat-item { text-align: center; }
+    .stat-value {
+      font-size: 16pt;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .stat-value.verde { color: #0d6b0e; }
+    .stat-value.vermelho { color: #ba1a1a; }
+    .stat-value.cinza { color: #40493c; }
+    .stat-value.roxo { color: #a03265; }
+    .stat-label {
+      font-size: 7pt;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 600;
+      color: #40493c;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .conformidade {
+      margin-top: 10px;
+      font-size: 11pt;
+      font-weight: 800;
+      color: #0d6b0e;
+    }
+
+    /* Seções do checklist */
+    .secao-header {
+      background: #ebf0e3;
+      padding: 8px 12px;
+      margin-top: 16px;
+      margin-bottom: 4px;
+      font-size: 9pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #181d16;
+      page-break-inside: avoid;
+    }
+
+    /* Itens */
+    .item-row {
+      padding: 8px 12px;
+      border-bottom: 1px solid #f0f5e9;
+      page-break-inside: avoid;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-row.nao-conforme {
+      border-left: 3px solid #ba1a1a;
+      background: #fff8f8;
+    }
+    .item-num {
+      font-size: 7pt;
+      font-weight: 700;
+      font-family: Arial, Helvetica, sans-serif;
+      text-transform: uppercase;
+      color: #707a6a;
+    }
+    .item-num.conforme { color: #0d6b0e; }
+    .item-num.nao_conforme { color: #ba1a1a; }
+    .item-texto { font-size: 9pt; margin-top: 2px; }
+    .item-status {
+      display: inline-block;
+      font-size: 7pt;
+      font-weight: 700;
+      font-family: Arial, Helvetica, sans-serif;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+    .status-conforme { background: #9df88b; color: #002201; }
+    .status-nao_conforme { background: #ffdad6; color: #93000a; }
+    .status-nao_aplicavel { background: #dfe4d8; color: #40493c; }
+    .status-pendente { background: #ffd9e4; color: #3e0021; }
+    .item-obs {
+      font-size: 8pt;
+      color: #40493c;
+      font-style: italic;
+      margin-top: 4px;
+      padding: 4px 8px;
+      background: #fff3f3;
+      border-radius: 2px;
+    }
+
+    /* Rodapé */
+    @page {
+      size: A4;
+      margin: 20mm 15mm 25mm 15mm;
+    }
+    .assinaturas {
+      margin-top: 40px;
+      page-break-inside: avoid;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    .assinatura-linha {
+      border-top: 1px solid #707a6a;
+      padding-top: 6px;
+      font-size: 8pt;
+      color: #40493c;
+    }
+    .rodape-info {
+      margin-top: 20px;
+      font-size: 7pt;
+      color: #707a6a;
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+      border-top: 1px solid #dfe4d8;
+      padding-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cabeçalho -->
+  <div class="report-header">
+    <p class="org">PFIS — Cozinha Industrial</p>
+    <h1>AUDITORIA INTERNA PFIS</h1>
+    <p class="doc-id">{{ auditoria.documento }}</p>
+  </div>
+
+  <!-- Metadados -->
+  <div class="meta-grid">
+    <div class="meta-cell">
+      <p class="meta-label">Unidade</p>
+      <p class="meta-value">{{ auditoria.unidade.nome }}</p>
+    </div>
+    <div class="meta-cell">
+      <p class="meta-label">Data da Auditoria</p>
+      <p class="meta-value">{{ auditoria.data|date:"d/m/Y" }}</p>
+    </div>
+    <div class="meta-cell">
+      <p class="meta-label">Status</p>
+      <p class="meta-value">{{ auditoria.get_status_display }}</p>
+    </div>
+    <div class="meta-cell">
+      <p class="meta-label">Fiscal PFIS</p>
+      <p class="meta-value">{{ auditoria.fiscal.get_full_name|default:auditoria.fiscal.username }}</p>
+    </div>
+    <div class="meta-cell wide">
+      <p class="meta-label">Responsável Técnico</p>
+      <p class="meta-value">{{ auditoria.responsavel_tecnico }}</p>
+    </div>
+  </div>
+
+  <!-- Resumo executivo -->
+  <div class="summary-box">
+    <h2>Resumo Executivo</h2>
+    <div class="summary-stats">
+      <div class="stat-item">
+        <div class="stat-value">{{ auditoria.total_itens }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value verde">{{ auditoria.conformes }}</div>
+        <div class="stat-label">Conformes</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value vermelho">{{ auditoria.nao_conformes }}</div>
+        <div class="stat-label">Não Conformes</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value cinza">{{ auditoria.nao_aplicaveis }}</div>
+        <div class="stat-label">N/A</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value roxo">{{ auditoria.pendentes }}</div>
+        <div class="stat-label">Pendentes</div>
+      </div>
+    </div>
+    <div class="conformidade">
+      Índice de Conformidade: {{ auditoria.indice_conformidade }}%
+    </div>
+  </div>
+
+  <!-- Itens por seção -->
+  {% for secao, respostas in secoes.items %}
+  <div class="secao-header">{{ secao }}</div>
+  {% for resposta in respostas %}
+  <div class="item-row {% if resposta.status == 'nao_conforme' %}nao-conforme{% endif %}">
+    <p class="item-num {{ resposta.status }}">Item {{ resposta.item.numero }}</p>
+    <p class="item-texto">{{ resposta.item.texto }}</p>
+    <span class="item-status status-{{ resposta.status }}">{{ resposta.get_status_display }}</span>
+    {% if resposta.observacao %}
+    <p class="item-obs">{{ resposta.observacao }}</p>
+    {% endif %}
+    {% if resposta.evidencia_data_url %}
+    <img src="{{ resposta.evidencia_data_url }}" style="max-width:140px;max-height:90px;margin-top:4px;border-radius:2px;display:block;" />
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% endfor %}
+
+  <!-- Assinaturas -->
+  <div class="assinaturas">
+    <div>
+      <div class="assinatura-linha">
+        Fiscal PFIS: {{ auditoria.fiscal.get_full_name|default:auditoria.fiscal.username }}
+      </div>
+    </div>
+    <div>
+      <div class="assinatura-linha">
+        Responsável Técnico: {{ auditoria.responsavel_tecnico }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Rodapé -->
+  <div class="rodape-info">
+    Gerado em {{ gerado_em|date:"d/m/Y \à\s H:i" }} por {{ gerado_por.get_full_name|default:gerado_por.username }} &mdash;
+    Sistema de Auditoria Interna PFIS
+  </div>
+
+</body>
+</html>

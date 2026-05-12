@@ -1,0 +1,120 @@
+{% load static %}
+<div class="bg-surface-container-lowest p-5 rounded-lg
+            {% if resposta.status == 'nao_conforme' %}border-l-4 border-l-error{% endif %}"
+     id="item-{{ resposta.pk }}">
+
+  <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+    <!-- Texto do item -->
+    <div class="flex-1 min-w-0">
+      <span class="font-label text-xs font-bold uppercase
+                   {% if resposta.status == 'nao_conforme' %}text-error{% elif resposta.status == 'conforme' %}text-primary{% else %}text-outline{% endif %}">
+        Item {{ resposta.item.numero }}
+      </span>
+      <p class="text-on-surface mt-1 leading-relaxed text-sm">{{ resposta.item.texto }}</p>
+      {% if resposta.item.apontamento %}
+      <p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed italic">
+        <span class="font-label font-bold not-italic">Instrução:</span> {{ resposta.item.apontamento }}
+      </p>
+      {% endif %}
+    </div>
+
+    <!-- Botões de resposta -->
+    <div class="flex flex-wrap gap-2 shrink-0">
+      <!-- CONFORME -->
+      <button hx-post="{% url 'responder_item' auditoria.pk resposta.pk %}"
+              hx-vals='{"status": "conforme", "observacao": ""}'
+              hx-target="#item-{{ resposta.pk }}"
+              hx-swap="outerHTML"
+              hx-include="#obs-{{ resposta.pk }}"
+              class="min-h-[44px] px-4 py-2 rounded-sm text-xs font-bold border transition-all active:scale-95
+                     {% if resposta.status == 'conforme' %}bg-primary text-on-primary shadow-md border-primary{% else %}border-primary/40 text-primary hover:bg-primary/5{% endif %}">
+        CONFORME
+      </button>
+      <!-- NÃO CONFORME -->
+      <button hx-post="{% url 'responder_item' auditoria.pk resposta.pk %}"
+              hx-vals='{"status": "nao_conforme"}'
+              hx-target="#item-{{ resposta.pk }}"
+              hx-swap="outerHTML"
+              hx-include="#obs-{{ resposta.pk }}"
+              class="min-h-[44px] px-4 py-2 rounded-sm text-xs font-bold border transition-all active:scale-95
+                     {% if resposta.status == 'nao_conforme' %}bg-error text-on-error shadow-md border-error{% else %}border-error/40 text-error hover:bg-error/5{% endif %}">
+        NÃO CONFORME
+      </button>
+      <!-- N/A -->
+      <button hx-post="{% url 'responder_item' auditoria.pk resposta.pk %}"
+              hx-vals='{"status": "nao_aplicavel", "observacao": ""}'
+              hx-target="#item-{{ resposta.pk }}"
+              hx-swap="outerHTML"
+              class="min-h-[44px] px-4 py-2 rounded-sm text-xs font-bold border transition-all active:scale-95
+                     {% if resposta.status == 'nao_aplicavel' %}bg-on-surface-variant text-surface shadow-md border-on-surface-variant{% else %}border-outline-variant text-on-surface-variant hover:bg-surface-container{% endif %}">
+        N/A
+      </button>
+    </div>
+  </div>
+
+  {% if resposta.status == 'nao_conforme' %}
+  <!-- Área de evidência + observação (NÃO CONFORME) -->
+  <div class="mt-4 p-4 bg-error-container/20 rounded-lg">
+    <p class="text-xs font-label font-bold text-on-error-container uppercase mb-3">Evidência / Observação</p>
+
+    <!-- Upload de foto -->
+    <form hx-post="{% url 'evidencia_upload' auditoria.pk resposta.pk %}"
+          hx-target="#evidencia-{{ resposta.pk }}"
+          hx-swap="outerHTML"
+          hx-encoding="multipart/form-data"
+          id="evidencia-form-{{ resposta.pk }}">
+      {% csrf_token %}
+      <div id="evidencia-{{ resposta.pk }}">
+        {% include "auditorias/partials/evidencia_upload.html" with resposta=resposta auditoria=auditoria %}
+      </div>
+    </form>
+
+    <!-- Observação -->
+    <div class="mt-3">
+      <textarea id="obs-{{ resposta.pk }}"
+                name="observacao"
+                rows="2"
+                hx-post="{% url 'responder_item' auditoria.pk resposta.pk %}"
+                hx-vals='{"status": "nao_conforme"}'
+                hx-target="#item-{{ resposta.pk }}"
+                hx-swap="outerHTML"
+                hx-trigger="blur"
+                class="w-full bg-white/50 border border-error/30 rounded-md text-sm p-3 focus:ring-1 focus:ring-error focus:outline-none resize-none"
+                placeholder="Descreva o desvio encontrado...">{{ resposta.observacao }}</textarea>
+    </div>
+  </div>
+  {% elif resposta.status == 'conforme' or resposta.status == 'nao_aplicavel' %}
+  <!-- Campo de observação opcional para conforme/N/A -->
+  <div class="mt-3">
+    <textarea id="obs-{{ resposta.pk }}"
+              name="observacao"
+              rows="1"
+              hx-post="{% url 'responder_item' auditoria.pk resposta.pk %}"
+              hx-vals='{"status": "{{ resposta.status }}"}'
+              hx-target="#item-{{ resposta.pk }}"
+              hx-swap="outerHTML"
+              hx-trigger="blur"
+              class="w-full bg-surface-container-low rounded-md text-sm p-3 border-0 focus:ring-1 focus:ring-primary focus:outline-none resize-none"
+              placeholder="Observação opcional...">{{ resposta.observacao }}</textarea>
+  </div>
+  {% else %}
+  <!-- Pendente: campo de observação vazio -->
+  <div class="mt-3">
+    <textarea id="obs-{{ resposta.pk }}"
+              name="observacao"
+              rows="1"
+              class="w-full bg-surface-container-low rounded-md text-sm p-3 border-0 focus:ring-1 focus:ring-primary focus:outline-none resize-none"
+              placeholder="Observação..."></textarea>
+  </div>
+  {% endif %}
+
+</div>
+{% if oob_progress %}
+<div id="resumo-sidebar" hx-swap-oob="innerHTML">
+  {% include "auditorias/partials/resumo_sidebar.html" with auditoria=auditoria %}
+</div>
+<div id="progress-bar" hx-swap-oob="true"
+     class="h-full audit-pulse rounded-full transition-all duration-700 ease-out"
+     style="width: {{ auditoria.progresso }}%"></div>
+<span id="progress-pct" hx-swap-oob="innerHTML">{{ auditoria.progresso }}%</span>
+{% endif %}

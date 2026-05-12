@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Auditoria — PFIS{% endblock %}
+
+{% block content %}
+<div class="px-4 md:px-8 py-8 max-w-2xl">
+  <div class="mb-8">
+    <a href="{% url 'auditorias' %}" class="text-xs font-label text-on-surface-variant hover:text-primary flex items-center gap-1 mb-4 transition-colors w-fit">
+      <span class="material-symbols-outlined text-base">arrow_back</span>
+      Voltar às auditorias
+    </a>
+    <p class="text-xs font-label font-bold text-primary tracking-widest uppercase mb-1">Fiscalização Periódica</p>
+    <h1 class="text-3xl font-headline font-extrabold text-on-surface tracking-tight">Nova Auditoria</h1>
+    <p class="text-on-surface-variant text-sm mt-1">
+      O código do documento será gerado automaticamente no formato <strong>PFIS-{{ "now"|date:"Y" }}-NNNN</strong>.
+    </p>
+  </div>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="space-y-6">
+      <div class="bg-surface-container-low p-6 rounded-lg">
+        <label class="block text-xs font-label font-bold text-on-surface-variant uppercase mb-3">
+          Unidade *
+        </label>
+        {{ form.unidade }}
+        {% if form.unidade.errors %}
+        <p class="mt-1.5 text-xs text-error font-semibold">{{ form.unidade.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-surface-container-low p-6 rounded-lg">
+          <label class="block text-xs font-label font-bold text-on-surface-variant uppercase mb-3">
+            Data da Auditoria *
+          </label>
+          {{ form.data }}
+          {% if form.data.errors %}
+          <p class="mt-1.5 text-xs text-error font-semibold">{{ form.data.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+
+        <div class="bg-surface-container-low p-6 rounded-lg">
+          <label class="block text-xs font-label font-bold text-on-surface-variant uppercase mb-3">
+            Fiscal PFIS
+          </label>
+          <p class="text-base font-semibold text-on-surface py-2">
+            {{ request.user.get_full_name|default:request.user.username }}
+          </p>
+        </div>
+      </div>
+
+      <div class="bg-surface-container-low p-6 rounded-lg">
+        <label class="block text-xs font-label font-bold text-on-surface-variant uppercase mb-3">
+          Responsável Técnico *
+        </label>
+        {{ form.responsavel_tecnico }}
+        {% if form.responsavel_tecnico.errors %}
+        <p class="mt-1.5 text-xs text-error font-semibold">{{ form.responsavel_tecnico.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="mt-8 flex gap-3">
+      <button type="submit"
+              class="audit-pulse text-white font-bold px-8 py-3 rounded-sm text-sm flex items-center gap-2 hover:opacity-90 transition-opacity">
+        <span class="material-symbols-outlined text-lg">fact_check</span>
+        Criar e Preencher Auditoria
+      </button>
+      <a href="{% url 'auditorias' %}"
+         class="bg-surface-container text-on-surface font-bold px-6 py-3 rounded-sm text-sm hover:bg-surface-container-high transition-colors">
+        Cancelar
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

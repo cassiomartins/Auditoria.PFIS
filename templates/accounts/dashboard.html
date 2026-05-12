@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Auditoria PFIS{% endblock %}
+
+{% block content %}
+<div class="px-4 md:px-8 py-8 max-w-7xl">
+  <!-- Cabeçalho -->
+  <div class="mb-8">
+    <p class="text-xs font-label font-bold text-primary tracking-widest uppercase mb-1">Sistema de Controle</p>
+    <h1 class="text-3xl font-headline font-extrabold text-on-surface tracking-tight">Dashboard</h1>
+    <p class="text-on-surface-variant mt-1 text-sm">
+      Bem-vindo, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+      — {{ request.user.get_perfil_display }}
+    </p>
+  </div>
+
+  <!-- Cards de resumo -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+    <div class="bg-surface-container-low p-6 rounded-lg">
+      <p class="text-xs font-label font-bold text-on-surface-variant uppercase mb-2">Total de Auditorias</p>
+      <p class="text-4xl font-black text-on-surface">{{ total }}</p>
+    </div>
+    <div class="bg-surface-container-low p-6 rounded-lg">
+      <p class="text-xs font-label font-bold text-on-surface-variant uppercase mb-2">Em Rascunho</p>
+      <p class="text-4xl font-black text-tertiary">{{ rascunhos }}</p>
+    </div>
+    <div class="bg-surface-container-low p-6 rounded-lg">
+      <p class="text-xs font-label font-bold text-on-surface-variant uppercase mb-2">Finalizadas</p>
+      <p class="text-4xl font-black text-primary">{{ finalizadas }}</p>
+    </div>
+  </div>
+
+  <!-- Ações rápidas -->
+  <div class="flex flex-wrap gap-3 mb-10">
+    {% if request.user.is_fiscal or request.user.is_gestor %}
+    <a href="{% url 'auditoria_nova' %}"
+       class="audit-pulse text-white font-bold px-5 py-3 rounded-sm text-sm flex items-center gap-2 hover:opacity-90 transition-opacity">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Nova Auditoria
+    </a>
+    {% endif %}
+    <a href="{% url 'auditorias' %}"
+       class="bg-white border border-outline-variant text-on-surface font-bold px-5 py-3 rounded-sm text-sm flex items-center gap-2 hover:bg-surface-container transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+      Ver Todas as Auditorias
+    </a>
+    {% if request.user.is_gestor %}
+    <a href="{% url 'usuarios' %}"
+       class="bg-white border border-outline-variant text-on-surface font-bold px-5 py-3 rounded-sm text-sm flex items-center gap-2 hover:bg-surface-container transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      Gerenciar Usuários
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Auditorias recentes -->
+  {% if auditorias_recentes %}
+  <div>
+    <h2 class="text-lg font-bold text-on-surface mb-4">Auditorias Recentes</h2>
+    <div class="space-y-2">
+      {% for a in auditorias_recentes %}
+      <div class="bg-surface-container-lowest p-4 rounded-lg flex items-center justify-between gap-4">
+        <div class="flex items-center gap-4 min-w-0">
+          <span class="font-label font-bold text-primary text-sm shrink-0">{{ a.documento }}</span>
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-on-surface truncate">{{ a.unidade.nome }}</p>
+            <p class="text-xs text-on-surface-variant font-label">{{ a.data|date:"d/m/Y" }} — {{ a.fiscal.get_full_name|default:a.fiscal.username }}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+          <span class="text-xs font-label font-bold px-3 py-1 rounded-full
+                       {% if a.status == 'finalizada' %}bg-primary/10 text-primary{% else %}bg-tertiary/10 text-tertiary{% endif %}">
+            {{ a.get_status_display }}
+          </span>
+          <a href="{% url 'auditoria_detalhe' a.pk %}"
+             class="text-on-surface-variant hover:text-primary transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-16">
+    <svg class="w-12 h-12 text-outline-variant mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    <p class="text-on-surface-variant font-semibold mb-4">Nenhuma auditoria encontrada.</p>
+    {% if request.user.is_fiscal or request.user.is_gestor %}
+    <a href="{% url 'auditoria_nova' %}" class="text-primary font-bold text-sm hover:underline">
+      Criar primeira auditoria →
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
